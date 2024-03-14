@@ -10,10 +10,14 @@ import { GlobalDisplayApi } from "./GlobalDisplayApi";
 import { GlobalDisplayWidgetProvider } from "./GlobalDisplayWidget";
 import { authClient } from "./common/AuthorizationClient";
 import { mapLayerOptions, tileAdminOptions } from "./common/MapLayerOptions";
+import { MapMarkerDecorator } from "./MapMarkerDecorator"
+import { MarkerPinUIProvider } from "./MarkerPinUI";
+
 
 const uiProviders = [
   new GlobalDisplayWidgetProvider(),
   new ViewerNavigationToolsProvider(),
+  new MarkerPinUIProvider()
 ];
 const viewportOptions: ViewerViewportControlOptions = {
   viewState: async (iModelConnection) => {
@@ -24,7 +28,17 @@ const viewportOptions: ViewerViewportControlOptions = {
       // We're not interested in seeing the contents of the iModel, only the global data.
       if (viewport.view.isSpatialView())
         viewport.view.modelSelector.models.clear();
+
+      /**const markersData: MarkerData[] = [
+          // Example: { point: Point3d.create(longitude, latitude, 0), title: "Marker 1" },
+          { point: Point3d.create(-0.0792, 51.5233, 0), title: "London", description: "Description 1" }
+      ];
+      const markerPinDecorator = MarkerPinApi.setupDecorator()
+      MarkerPinApi.setMarkersData(markerPinDecorator, markersData);
+      MarkerPinApi.enableDecorations(markerPinDecorator);**/
     });
+    
+    
     return GlobalDisplayApi.getInitialView(iModelConnection);
   },
 };
@@ -54,7 +68,10 @@ const GlobalDisplayApp = () => {
     tileAdmin={tileAdminOptions}
     theme={process.env.THEME ?? "dark"}
   />;
+
 };
+
+
 
 // Define panel size
 UiFramework.frontstages.onFrontstageReadyEvent.addListener((event) => {
