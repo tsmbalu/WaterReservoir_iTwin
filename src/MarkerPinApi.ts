@@ -19,7 +19,7 @@ export default class MarkerPinApi {
 
   // START SETMARKERDATA
   public static setMarkersData(decorator: MarkerPinDecorator, markersData: MarkerData[]) {
-    const pinImage = MarkerPinApi._images.get("pin_google_maps.svg");
+    const pinImage = MarkerPinApi._images.get("pin_celery.svg");
 
     if (!pinImage)
       return;
@@ -29,7 +29,7 @@ export default class MarkerPinApi {
   // END SETMARKERDATA
 
   public static addMarkerPointWithGPin(decorator: MarkerPinDecorator, point: Point3d) {
-    const pinImage = MarkerPinApi._images.get("pin_google_maps.svg");
+    const pinImage = MarkerPinApi._images.get("pin_celery.svg");
 
     if (!pinImage)
       return;

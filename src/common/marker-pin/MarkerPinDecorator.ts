@@ -31,6 +31,9 @@ export interface MarkerData {
   title?: string;         // override default marker tooltip title
   description?: string;   // override default marker tooltip description
   data?: any;
+  capacity?: number;
+  ph?: number;
+  hardness?: number;
 }
 // END MARKERDATA
 
@@ -78,12 +81,30 @@ class SamplePinMarker extends Marker {
       if (markerData.description) {
         tooltip += `<br>${markerData.description}`;
       }
+      if (markerData.capacity) {
+        tooltip += `<br>Capacity: ${markerData.capacity} MCM`;
+      }
+      if (markerData.ph) {
+        tooltip += `<br>PH Level: ${markerData.ph}`;
+      }
+      if (markerData.hardness) {
+        tooltip += `<br>Hardness: ${markerData.hardness} ppm, mg/L`;
+      }
     } else {
       this.toolTipTitle = title;
       this.toolTipDescription = description ? description : "";
       tooltip = title;
       if (description) {
         tooltip += `<br>${description}`;
+      }
+      if (markerData.capacity) {
+        tooltip += `<br>Capacity: ${markerData.capacity}`;
+      }
+      if (markerData.ph) {
+        tooltip += `<br>PH Level: ${markerData.ph}`;
+      }
+      if (markerData.hardness) {
+        tooltip += `<br>Hardness: ${markerData.hardness}`;
       }
     }
     const div = document.createElement("div");

@@ -16,8 +16,10 @@ import { Point3d, Range2d } from "@itwin/core-geometry";
 import { Alert, Button, Fieldset, RadioTile, RadioTileGroup, ToggleSwitch } from "@itwin/itwinui-react";
 import { MarkerData, MarkerPinDecorator } from "./common/marker-pin/MarkerPinDecorator";
 import { PopupMenu } from "./common/marker-pin/PopupMenu";
+import { Cartographic } from "@itwin/core-common";
 import MarkerPinApi from "./MarkerPinApi";
 import "./MarkerPin.scss";
+import { WaterReservoirApi } from "./WaterReservoirApi";
 
 interface ManualPinSelection {
   name: string;
@@ -75,9 +77,7 @@ const MarkerPinUI = () => {
       return;
 
     void IModelApp.localization.registerNamespace("marker-pin-i18n-namespace");
-    
-    
-    MarkerPinApi.setMarkersData(markerPinDecorator, markersDataState);
+    //MarkerPinApi.setMarkersData(markerPinDecorator, markersDataState);
 
     if (viewport)
       viewInit();
@@ -114,12 +114,8 @@ const MarkerPinUI = () => {
     // Grab the max Z for the view contents.  We'll use this as the plane for the auto-generated markers. */
     const height = range3d.zHigh;
 
-    setRangeState(range);
-    setHeightState(height);
-    
-    MarkerPinApi.addMarkerPoint(markerPinDecorator, Point3d.create(-0.0792, 51.5233, 1.0), MarkerPinApi._images.get(manualPinState.image)!);
-
-
+    //setRangeState(range);
+    //setHeightState(height);
   };
 
   /** This callback will be executed when the user interacts with the PointSelector
@@ -134,15 +130,61 @@ const MarkerPinUI = () => {
     setMarkersDataState(markersData);
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const apiData = await WaterReservoirApi.getData();
+        const markersData: MarkerData[] = apiData.map((item: any) => ({
+          point: Point3d.create(item.lon, item.lat, item.alt),
+          title: item.name,
+          ph: item.phLevel,
+          hardness: item.hardness,
+          capacity: item.capacity
+        }));
+        setMarkersDataState(markersData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   /** This callback will be executed by the PlaceMarkerTool when it is time to create a new marker */
   const _manuallyAddMarker = (point: Point3d) => {
-    MarkerPinApi.addMarkerPoint(markerPinDecorator, point, MarkerPinApi._images.get(manualPinState.image)!);
+    //MarkerPinApi.addMarkerPoint(markerPinDecorator, point, MarkerPinApi._images.get(manualPinState.image)!);
+    MarkerPinApi.addMarkerPointWithGPin(markerPinDecorator, point);
+  };
+
+  /** This callback will be executed when the user clicks the UI button.  It will start the tool which
+   * handles further user input.
+   */ 
+  const _onStartPlaceMarkerTool = () => {
+    
+    //void IModelApp.tools.run(PlaceMarkerTool.toolId, _manuallyAddMarker);
+    //MarkerPinApi.addMarkerPointWithGPin(markerPinDecorator, Point3d.create(51.5214, -0.1374, 0));
+    /*const markersData: MarkerData[] = [
+      // Example: { point: Point3d.create(longitude, latitude, 0), title: "Marker 1" },
+      { point: Point3d.create(-3795589.008324042, 3225995.4292857116, -2390182.560204367), title: "London", description: "London" }
+    ];*/
+    //MarkerPinApi.setMarkersData(markerPinDecorator, markersData);
+
   };
 
   // Display drawing and sheet options in separate sections.
   return (
     <div className="sample-options">
       <ToggleSwitch className="show-markers" label="Show markers" labelPosition="right" checked={showDecoratorState} onChange={() => setShowDecoratorState(!showDecoratorState)} />
+
+      <div className="sample-grid">
+        <Fieldset legend="Water Reserve" className="manual-placement">
+          <Button
+            styleType="high-visibility"
+            className="manual-placement-btn"
+            onClick={_onStartPlaceMarkerTool}
+            title="Click here and then click the view to place a new marker">Get Water Reserves</Button>
+        </Fieldset>
+      </div>
       <PopupMenu canvas={viewport?.canvas} />
     </div>
   );
