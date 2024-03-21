@@ -154,7 +154,8 @@ class SamplePinMarker extends Marker {
     const menuEntries: PopupMenuEntry[] = [];
 
     menuEntries.push({ label: "Center View", onPicked: this._centerMarkerCallback });
-    menuEntries.push({ label: "Remove Marker", onPicked: this._removeMarkerCallback });
+    //menuEntries.push({ label: "Remove Marker", onPicked: this._removeMarkerCallback });
+    menuEntries.push({ label: "Show Trend", onPicked: this._showTrendCallback });
 
     const offset = 8;
     PopupMenu.onPopupMenuEvent.emit({
@@ -172,6 +173,19 @@ class SamplePinMarker extends Marker {
 
   /** This method will be called when the user clicks on the entry in the popup menu */
   private _centerMarkerCallback = (_entry: PopupMenuEntry) => {
+    const vp = IModelApp.viewManager.selectedView;
+
+    if (undefined !== vp) {
+      // This approach doesn't animate.  An iTwin.js bug?
+      // vp.view.setCenter(this.worldLocation);
+      // vp.synchWithView({ animateFrustumChange: true });
+
+      // This approach doesn't work well with camera turned on
+      vp.zoom(this.worldLocation, 1.0, { animateFrustumChange: true });
+    }
+  };
+
+  private _showTrendCallback = (_entry: PopupMenuEntry) => {
     const vp = IModelApp.viewManager.selectedView;
 
     if (undefined !== vp) {
