@@ -8,4 +8,13 @@ export class WaterReservoirApi{
         return data;
 
     }
+
+    public static async getReservoirData(reservoirID: string){
+
+        const response = await fetch(`http://localhost:8080/api/reservoirAudit/${reservoirID}`);
+        const data = response.json();
+
+        return data;
+
+    }
 }

@@ -2,7 +2,7 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { BeButton, BeButtonEvent, Cluster, DecorateContext, Decorator, IModelApp, Marker, MarkerSet } from "@itwin/core-frontend";
+import { BeButton, BeButtonEvent, Cluster, DecorateContext, Decorator, IModelApp, Marker, MarkerSet, Target } from "@itwin/core-frontend";
 import { Point2d, Point3d, Range1dProps, XAndY, XYAndZ } from "@itwin/core-geometry";
 import { PopupMenu, PopupMenuEntry } from "./PopupMenu";
 import Chart from 'chart.js/auto';
@@ -235,40 +235,12 @@ class SamplePinMarker extends Marker {
       // This approach doesn't work well with camera turned on
       vp.zoom(this.worldLocation, 1.0, { animateFrustumChange: true });
     }
-
-    try {
-      // Make HTTP request to fetch data from the REST API
-      const response = await fetch('http://localhost:8080/api/reservoirAudit/1');
-      
-      // Parse the response JSON
-      const data = await response.json();
-
-      console.log(data);
-      
-      // Extract necessary information from the response data
-      const labels = data.map((item: any) => item.auditDate);
-      const capacityValues = data.map((item: any) => item.capacity);
-      const hardnessValues = data.map((item: any) => item.hardness);
-      const phLevelValues = data.map((item: any) => item.phLevel);
-      
-      // Create the line chart using a charting library (e.g., Chart.js)
-      const chart = this.createLineChart(labels, capacityValues, hardnessValues, phLevelValues);
-      this.openPopupWindow(chart);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
+    this.showChart();
   };
 
-  private openPopupWindow = (chart: any) => {
+  private showChart = () => {
     // Open new popup window
-    const popupWindow = window.open('', 'chartPopup', 'width=600,height=400');
-
-    // Render chart in the popup window
-    if (popupWindow) {
-        popupWindow.document.body.appendChild(chart.canvas);
-    } else {
-        console.error('Failed to open popup window');
-    }
+    const popupWindow = window.open('/chart?reservoir=1', '_blank');
   };
 }
 
