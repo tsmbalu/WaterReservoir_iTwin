@@ -5,6 +5,7 @@
 import { BeButton, BeButtonEvent, Cluster, DecorateContext, Decorator, IModelApp, Marker, MarkerSet } from "@itwin/core-frontend";
 import { Point2d, Point3d, Range1dProps, XAndY, XYAndZ } from "@itwin/core-geometry";
 import { PopupMenu, PopupMenuEntry } from "./PopupMenu";
+import Chart from 'chart.js/auto';
 
 /*
  * There are four classes that cooperate to produce the markers.
@@ -185,7 +186,45 @@ class SamplePinMarker extends Marker {
     }
   };
 
-  private _showTrendCallback = (_entry: PopupMenuEntry) => {
+  private createLineChart(labels: string[], capacityValues: number[], hardnessValues: number[], phLevelValues: number[]) {
+    // Use a charting library to create the line chart
+    // Example using Chart.js
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      return new Chart(ctx, {
+          type: 'line',
+          data: {
+              labels: labels,
+              datasets: [{
+                  label: 'Capacity',
+                  data: capacityValues,
+                  borderColor: 'blue',
+                  borderWidth: 1
+              },{
+                  label: 'Hardness',
+                  data: hardnessValues,
+                  borderColor: 'green',
+                  borderWidth: 1
+              },{
+                  label: 'pH Level',
+                  data: phLevelValues,
+                  borderColor: 'red',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
+    }
+  }
+
+  private _showTrendCallback = async (_entry: PopupMenuEntry) => {
     const vp = IModelApp.viewManager.selectedView;
 
     if (undefined !== vp) {
@@ -195,6 +234,40 @@ class SamplePinMarker extends Marker {
 
       // This approach doesn't work well with camera turned on
       vp.zoom(this.worldLocation, 1.0, { animateFrustumChange: true });
+    }
+
+    try {
+      // Make HTTP request to fetch data from the REST API
+      const response = await fetch('http://localhost:8080/api/reservoirAudit/1');
+      
+      // Parse the response JSON
+      const data = await response.json();
+
+      console.log(data);
+      
+      // Extract necessary information from the response data
+      const labels = data.map((item: any) => item.auditDate);
+      const capacityValues = data.map((item: any) => item.capacity);
+      const hardnessValues = data.map((item: any) => item.hardness);
+      const phLevelValues = data.map((item: any) => item.phLevel);
+      
+      // Create the line chart using a charting library (e.g., Chart.js)
+      const chart = this.createLineChart(labels, capacityValues, hardnessValues, phLevelValues);
+      this.openPopupWindow(chart);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+  };
+
+  private openPopupWindow = (chart: any) => {
+    // Open new popup window
+    const popupWindow = window.open('', 'chartPopup', 'width=600,height=400');
+
+    // Render chart in the popup window
+    if (popupWindow) {
+        popupWindow.document.body.appendChild(chart.canvas);
+    } else {
+        console.error('Failed to open popup window');
     }
   };
 }
